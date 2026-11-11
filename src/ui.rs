@@ -8,7 +8,8 @@
 //!
 //! Left (MATTER): SCATTER, DRIFT, FLARE, IN, DILATION.
 //! Right (GRAVITY): TIDE, ORBIT, MIX, OUT, PARALLAX.
-//! Below: seven performance pads, then the tone, period and horizon strip.
+//! Below: six performance pads around a round REC, then the tone, period and
+//! horizon strip.
 //! Every gesture shows in the sky: an eclipse covers the sun, a redshift
 //! reddens the orbits, dust sparkles, Roche draws tidal threads between the
 //! slice that plays and the slice it was torn from.
@@ -25,6 +26,10 @@ use truce_egui::EguiEditor;
 
 const W: f32 = 1180.0;
 const H: f32 = 790.0;
+/// Width of the MATTER and GRAVITY columns.
+const SIDE_W: f32 = 196.0;
+/// Scale of the orrery: every radius, planet and label in the sky.
+const K: f32 = 1.15;
 
 // --- Palette ------------------------------------------------------------------
 const BG: Color32 = Color32::from_rgb(6, 7, 12);
@@ -94,12 +99,12 @@ impl truce_egui::EditorUi<SideralParams> for SideralUi {
         starfield(&p, time);
 
         header(ui, st);
-        matter(ui, st, Rect::from_min_size(pos2(14.0, 66.0), vec2(252.0, 456.0)));
-        gravity(ui, st, Rect::from_min_size(pos2(W - 266.0, 66.0), vec2(252.0, 456.0)));
-        orrery(ui, st, pos2(W * 0.5, 292.0), time);
-        status_line(ui, st, Rect::from_min_size(pos2(290.0, 526.0), vec2(W - 580.0, 34.0)));
-        pads(ui, st, self, Rect::from_min_size(pos2(14.0, 570.0), vec2(W - 28.0, 100.0)), time);
-        strip(ui, st, Rect::from_min_size(pos2(14.0, 682.0), vec2(W - 28.0, 94.0)));
+        matter(ui, st, Rect::from_min_size(pos2(14.0, 66.0), vec2(SIDE_W, 548.0)));
+        gravity(ui, st, Rect::from_min_size(pos2(W - 14.0 - SIDE_W, 66.0), vec2(SIDE_W, 548.0)));
+        orrery(ui, st, pos2(W * 0.5, 324.0), time);
+        status_line(ui, st, Rect::from_min_size(pos2(SIDE_W + 40.0, 584.0), vec2(W - 2.0 * SIDE_W - 80.0, 30.0)));
+        pads(ui, st, self, Rect::from_min_size(pos2(14.0, 632.0), vec2(W - 28.0, 74.0)), time);
+        strip(ui, st, Rect::from_min_size(pos2(14.0, 718.0), vec2(W - 28.0, 60.0)));
     }
 }
 
@@ -257,11 +262,11 @@ fn knob(ui: &mut egui::Ui, st: &Ctx, id: P, c: Pos2, r: f32, accent: Color32, ma
     let accent = if enabled { accent } else { FAINT };
     for i in 0..7 {
         let a = start + sweep * i as f32 / 6.0;
-        p.circle_filled(polar(c, r + 8.0, a), if i == 0 || i == 6 { 1.5 } else { 1.1 }, alpha(TEXT, if enabled { 0.65 } else { 0.25 }));
+        p.circle_filled(polar(c, r + 7.0, a), if i == 0 || i == 6 { 1.3 } else { 1.0 }, alpha(TEXT, if enabled { 0.65 } else { 0.25 }));
     }
     for &(v, t) in marks {
         let a = start + sweep * v;
-        p.text(polar(c, r + 19.0, a), Align2::CENTER_CENTER, t, FontId::monospace(8.5), DIM);
+        p.text(polar(c, r + 16.0, a), Align2::CENTER_CENTER, t, FontId::monospace(7.5), DIM);
     }
     let active = resp.hovered() || resp.dragged();
     p.add(egui::Shape::line(arc(c, r + 3.5, start, sweep, 48), stroke(1.5, alpha(FAINT, 0.6))));
@@ -277,26 +282,26 @@ fn knob(ui: &mut egui::Ui, st: &Ctx, id: P, c: Pos2, r: f32, accent: Color32, ma
     let a = start + sweep * value;
     p.line_segment([polar(c, r * 0.18, a), polar(c, r * 0.92, a)], stroke(2.4, Color32::from_rgb(20, 20, 24)));
     if active {
-        p.text(c + vec2(0.0, r + 13.0), Align2::CENTER_TOP, st.format_param(raw), FontId::proportional(10.5), accent);
+        p.text(c + vec2(0.0, r + 11.0), Align2::CENTER_TOP, st.format_param(raw), FontId::proportional(10.0), accent);
     }
     active
 }
 
-/// A big knob with its name and a two-line hint beside it.
+/// A main knob with its name and a two-line hint beside it.
 #[allow(clippy::too_many_arguments)]
 fn labelled(ui: &mut egui::Ui, st: &Ctx, id: P, name: &str, hint: (&str, &str), c: Pos2, accent: Color32, marks: &[(f32, &str)], enabled: bool) {
-    knob(ui, st, id, c, 29.0, accent, marks, enabled);
+    knob(ui, st, id, c, 21.0, accent, marks, enabled);
     let p = ui.painter();
-    let tx = c.x + 50.0;
-    p.text(pos2(tx, c.y - 14.0), Align2::LEFT_CENTER, name, FontId::proportional(14.0), if enabled { TEXT } else { FAINT });
-    p.text(pos2(tx, c.y + 4.0), Align2::LEFT_CENTER, hint.0, FontId::proportional(9.0), DIM);
-    p.text(pos2(tx, c.y + 16.0), Align2::LEFT_CENTER, hint.1, FontId::proportional(9.0), DIM);
+    let tx = c.x + 38.0;
+    p.text(pos2(tx, c.y - 12.0), Align2::LEFT_CENTER, name, FontId::proportional(12.5), if enabled { TEXT } else { FAINT });
+    p.text(pos2(tx, c.y + 4.0), Align2::LEFT_CENTER, hint.0, FontId::proportional(8.5), DIM);
+    p.text(pos2(tx, c.y + 15.0), Align2::LEFT_CENTER, hint.1, FontId::proportional(8.5), DIM);
 }
 
 fn small(ui: &mut egui::Ui, st: &Ctx, id: P, name: &str, c: Pos2, accent: Color32, marks: &[(f32, &str)]) {
-    let active = knob(ui, st, id, c, 16.0, accent, marks, true);
+    let active = knob(ui, st, id, c, 13.0, accent, marks, true);
     if !active {
-        ui.painter().text(c + vec2(0.0, 30.0), Align2::CENTER_CENTER, name, FontId::proportional(10.0), TEXT);
+        ui.painter().text(c + vec2(0.0, 26.0), Align2::CENTER_CENTER, name, FontId::proportional(9.0), TEXT);
     }
 }
 
@@ -345,13 +350,16 @@ fn segmented(ui: &mut egui::Ui, st: &Ctx, id: P, labels: &[&str], r: Rect, accen
         if resp.hovered() && !on {
             p.rect_stroke(cell.shrink(1.5), CornerRadius::same(5), stroke(1.0, FAINT), StrokeKind::Inside);
         }
-        p.text(cell.center(), Align2::CENTER_CENTER, *label, FontId::proportional(9.5), if on { BG } else { DIM });
+        p.text(cell.center(), Align2::CENTER_CENTER, *label, FontId::proportional(9.0), if on { BG } else { DIM });
     }
 }
 
 // ===========================================================================
 // Side columns
 // ===========================================================================
+
+/// Vertical positions of the knob rows in the side columns.
+const ROW: [f32; 4] = [84.0, 210.0, 336.0, 474.0];
 
 fn matter(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
     section(ui.painter(), r, "MATTER");
@@ -372,24 +380,24 @@ fn matter(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
         Family::Pulsar if nova => ("past noon: random", "octave falls"),
         Family::Pulsar => ("the loops wander", "across the sky"),
     };
-    let x = r.left() + 54.0;
+    let x = r.left() + 42.0;
     let rest = lay.family == Family::Reverb;
-    labelled(ui, st, P::Blur, "SCATTER", scatter, pos2(x, r.top() + 80.0), CYAN, &[], !rest);
-    labelled(ui, st, P::Drift, "DRIFT", drift, pos2(x, r.top() + 190.0), CYAN, &[], !rest);
-    labelled(ui, st, P::Drive, "FLARE", ("odd harmonics", "burning in the loop"), pos2(x, r.top() + 300.0), AMBER, &[], true);
+    labelled(ui, st, P::Blur, "SCATTER", scatter, pos2(x, r.top() + ROW[0]), CYAN, &[], !rest);
+    labelled(ui, st, P::Drift, "DRIFT", drift, pos2(x, r.top() + ROW[1]), CYAN, &[], !rest);
+    labelled(ui, st, P::Drive, "FLARE", ("odd harmonics", "burning in the loop"), pos2(x, r.top() + ROW[2]), AMBER, &[], true);
 
     let sc = &st.params().scope;
-    let y = r.top() + 396.0;
+    let y = r.top() + ROW[3];
     small(ui, st, P::Input, "IN", pos2(r.left() + 52.0, y), GREEN, &[]);
     let lvl = sc.read(Slot::InputPeak);
-    led(ui.painter(), pos2(r.left() + 18.0, y), if lvl > 0.3 { 1.0 } else { lvl / 0.3 }, if lvl > 0.95 { RED } else { GREEN });
-    small(ui, st, P::Clock, "DILATION", pos2(r.left() + 170.0, y), VIOLET, &[]);
+    led(ui.painter(), pos2(r.left() + 22.0, y), if lvl > 0.3 { 1.0 } else { lvl / 0.3 }, if lvl > 0.95 { RED } else { GREEN });
+    small(ui, st, P::Clock, "DILATION", pos2(r.left() + 140.0, y), VIOLET, &[]);
 }
 
 fn gravity(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
     section(ui.painter(), r, "GRAVITY");
     let sc = &st.params().scope;
-    let x = r.left() + 54.0;
+    let x = r.left() + 42.0;
     let tide = st.get_param(P::Supcom);
     let tide_hint = if tide < 0.49 {
         ("ebb: each new sound", "washes the old away")
@@ -398,7 +406,7 @@ fn gravity(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
     } else {
         ("ebb  ·  still  ·  flow", "")
     };
-    labelled(ui, st, P::Supcom, "TIDE", tide_hint, pos2(x, r.top() + 80.0), VIOLET, &[(0.0, "ebb"), (1.0, "flow")], true);
+    labelled(ui, st, P::Supcom, "TIDE", tide_hint, pos2(x, r.top() + ROW[0]), VIOLET, &[(0.0, "ebb"), (1.0, "flow")], true);
     let fbv = crate::engine::fb_gain(st.get_param(P::Feedback));
     let orbit_hint = if fbv > 1.0005 {
         "escaping: it grows"
@@ -408,21 +416,21 @@ fn gravity(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
         "a decaying orbit"
     };
     let gain_txt = format!("×{fbv:.3}");
-    labelled(ui, st, P::Feedback, "ORBIT", (&gain_txt, orbit_hint), pos2(x, r.top() + 190.0), AMBER, &[(0.162, "0.3"), (0.453, "0.7"), (0.952, "1")], true);
+    labelled(ui, st, P::Feedback, "ORBIT", (&gain_txt, orbit_hint), pos2(x, r.top() + ROW[1]), AMBER, &[(0.162, "0.3"), (0.453, "0.7"), (0.952, "1")], true);
     let mix = st.get_param(P::Mix);
     let mix_txt = format!("{:.0}% memory", mix * 100.0);
-    labelled(ui, st, P::Mix, "MIX", (&mix_txt, "against the present"), pos2(x, r.top() + 300.0), CYAN, &[(0.5, "·")], true);
+    labelled(ui, st, P::Mix, "MIX", (&mix_txt, "against the present"), pos2(x, r.top() + ROW[2]), CYAN, &[(0.5, "·")], true);
 
     let p = ui.painter();
-    let mx = r.left() + 104.0;
-    meter(p, pos2(mx, r.top() + 106.0), 130.0, sc.read(Slot::Suppress), VIOLET);
-    meter(p, pos2(mx, r.top() + 216.0), 130.0, sc.read(Slot::Limiter) * 4.0, RED);
+    let mx = x + 38.0;
+    meter(p, pos2(mx, r.top() + ROW[0] + 26.0), r.right() - mx - 14.0, sc.read(Slot::Suppress), VIOLET);
+    meter(p, pos2(mx, r.top() + ROW[1] + 26.0), r.right() - mx - 14.0, sc.read(Slot::Limiter) * 4.0, RED);
 
-    let y = r.top() + 396.0;
+    let y = r.top() + ROW[3];
     small(ui, st, P::Output, "OUT", pos2(r.left() + 52.0, y), GREEN, &[]);
     let out = sc.read(Slot::OutputPeak);
-    led(ui.painter(), pos2(r.left() + 18.0, y), (out / 0.3).min(1.0), if out > 0.95 { RED } else { GREEN });
-    small(ui, st, P::Width, "PARALLAX", pos2(r.left() + 170.0, y), CYAN, &[]);
+    led(ui.painter(), pos2(r.left() + 22.0, y), (out / 0.3).min(1.0), if out > 0.95 { RED } else { GREEN });
+    small(ui, st, P::Width, "PARALLAX", pos2(r.left() + 140.0, y), CYAN, &[]);
 }
 
 fn meter(p: &egui::Painter, at: Pos2, w: f32, v: f32, col: Color32) {
@@ -458,7 +466,7 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
     };
 
     // --- the memory ring ---------------------------------------------------
-    let r_mem = 156.0;
+    let r_mem = 156.0 * K;
     let loop_len = sc.read(Slot::LoopLen) as usize;
     let seg_of = |idx: usize| -> Option<usize> {
         if lay.family == Family::Pulsar {
@@ -485,14 +493,14 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
         let a = -PI / 2.0 + TAU * (b as f32 + 0.5) / BINS as f32;
         let v = sc.bin(b).sqrt().min(1.0);
         let col = seg_of(b * per).map_or(Color32::from_gray(90), |k| shade(ORBIT[k % 9]));
-        let len = 2.0 + v * 26.0;
-        p.line_segment([polar(c, r_mem + 1.0, a), polar(c, r_mem + 1.0 + len, a)], stroke(1.6, alpha(col, 0.22 + 0.7 * v)));
+        let len = 2.0 + v * 28.0 * K;
+        p.line_segment([polar(c, r_mem + 1.0, a), polar(c, r_mem + 1.0 + len, a)], stroke(1.9, alpha(col, 0.22 + 0.7 * v)));
     }
     if lay.family != Family::Pulsar {
         let mut b = 0;
         for &n in lay.lines.iter() {
             let a = -PI / 2.0 + TAU * b as f32 / MEM as f32;
-            p.line_segment([polar(c, r_mem - 5.0, a), polar(c, r_mem + 5.0, a)], stroke(1.0, alpha(TEXT, 0.55)));
+            p.line_segment([polar(c, r_mem - 6.0, a), polar(c, r_mem + 6.0, a)], stroke(1.0, alpha(TEXT, 0.55)));
             b += n;
         }
     }
@@ -500,8 +508,8 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
         for i in 0..90u32 {
             let k = i + (t * 24.0) as u32 * 97;
             let a = hash(k) * TAU;
-            let rr = 30.0 + hash(k + 1) * 160.0;
-            p.circle_filled(polar(c, rr, a), 0.9, alpha(SAND, 0.25 + 0.5 * hash(k + 2)));
+            let rr = (30.0 + hash(k + 1) * 160.0) * K;
+            p.circle_filled(polar(c, rr, a), 1.1, alpha(SAND, 0.25 + 0.5 * hash(k + 2)));
         }
     }
 
@@ -514,9 +522,10 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
         for k in 0..14 {
             let a0 = a + dir * k as f32 * 0.035;
             let a1 = a + dir * (k + 1) as f32 * 0.035;
-            p.line_segment([polar(c, r, a0), polar(c, r, a1)], stroke(2.0, alpha(col, 0.5 * (1.0 - k as f32 / 14.0))));
+            p.line_segment([polar(c, r, a0), polar(c, r, a1)], stroke(2.3, alpha(col, 0.5 * (1.0 - k as f32 / 14.0))));
         }
-        p.circle_filled(polar(c, r, a), size + 4.0, alpha(col, 0.15 + 0.2 * level));
+        let size = size * K;
+        p.circle_filled(polar(c, r, a), size + 4.5, alpha(col, 0.15 + 0.2 * level));
         p.circle_filled(polar(c, r, a), size, col);
     };
 
@@ -524,7 +533,7 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
         pulsar_orbits(&p, st, c, active, t, &shade, &planet);
     } else {
         let max_len = 1_097_101.0f32;
-        let radius = |n: usize| 32.0 + 100.0 * (n as f32 / max_len).sqrt();
+        let radius = |n: usize| (32.0 + 100.0 * (n as f32 / max_len).sqrt()) * K;
         let slots: Vec<(usize, usize)> = match lay.family {
             Family::TwoDelays => vec![(0, 0), (1, 1)],
             Family::FourDelays => vec![(0, 0), (1, 1), (2, 3), (3, 4)],
@@ -547,38 +556,38 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
                 }
                 let g = sc.get(Slot::Grain0 as usize + k);
                 let (rr, col) = match k / 4 {
-                    0 => (r - 9.0, CYAN),
-                    1 => (r + 9.0, AMBER),
+                    0 => (r - 10.0 * K, CYAN),
+                    1 => (r + 10.0 * K, AMBER),
                     _ => (r, VIOLET),
                 };
                 let a = -PI / 2.0 + TAU * g;
-                p.circle_filled(polar(c, rr, a), 2.2, alpha(shade(col), 0.9));
+                p.circle_filled(polar(c, rr, a), 2.2 * K, alpha(shade(col), 0.9));
             }
         }
     }
 
     // --- the sun, the LFOs, the eclipse ---------------------------------------
     let lvl = sc.read(Slot::InputPeak).min(1.0);
-    p.circle_filled(c, 16.0 + lvl * 10.0, alpha(AMBER, 0.06 + 0.12 * lvl));
-    p.circle_filled(c, 7.0 + lvl * 3.0, lerp_color(Color32::from_rgb(120, 90, 40), AMBER, 0.4 + lvl));
+    p.circle_filled(c, (16.0 + lvl * 10.0) * K, alpha(AMBER, 0.06 + 0.12 * lvl));
+    p.circle_filled(c, (7.0 + lvl * 3.0) * K, lerp_color(Color32::from_rgb(120, 90, 40), AMBER, 0.4 + lvl));
     if eclipse {
         let pulse = 0.5 + 0.5 * (t * 1.3).sin();
         for k in 0..3 {
-            p.circle_stroke(c, 13.0 + k as f32 * 5.0 + pulse * 2.0, stroke(1.0, alpha(Color32::WHITE, 0.25 - k as f32 * 0.07)));
+            p.circle_stroke(c, (13.0 + k as f32 * 5.0 + pulse * 2.0) * K, stroke(1.0, alpha(Color32::WHITE, 0.25 - k as f32 * 0.07)));
         }
-        p.circle_filled(c + vec2(1.5, -1.0), 11.0, Color32::from_rgb(4, 4, 8));
+        p.circle_filled(c + vec2(1.5, -1.0), 11.0 * K, Color32::from_rgb(4, 4, 8));
     }
     if matches!(lay.family, Family::TwoDelays | Family::FourDelays | Family::Granular | Family::Pulsar) {
         let n = if matches!(lay.family, Family::FourDelays | Family::Granular) { 4 } else { 2 };
         for k in 0..n {
             let v = sc.get(Slot::Lfo0 as usize + k).clamp(0.0, 1.0);
             let a = -PI / 2.0 + k as f32 * TAU / n as f32 + (v - 0.5) * 1.2;
-            p.circle_filled(polar(c, 22.0, a), 1.6, alpha(TEXT, 0.7));
+            p.circle_filled(polar(c, 22.0 * K, a), 1.8, alpha(TEXT, 0.7));
         }
     }
 
     // --- the five constellations of programs -------------------------------------
-    let r_dial = 206.0;
+    let r_dial = 206.0 * K;
     let settle = sc.read(Slot::Settle);
     let switching = sc.read(Slot::Switching) > 0.5;
     for &(name, first, count) in FAMILIES.iter() {
@@ -586,9 +595,9 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
         let a1 = dial_angle(first + count - 1) + 0.05;
         let on = selected >= first && selected < first + count;
         let col = if on { TEXT } else { FAINT };
-        p.add(egui::Shape::line(arc(c, r_dial + 12.0, a0, a1 - a0, 24), stroke(1.0, alpha(col, 0.8))));
+        p.add(egui::Shape::line(arc(c, r_dial + 13.0, a0, a1 - a0, 24), stroke(1.0, alpha(col, 0.8))));
         let mid = (a0 + a1) * 0.5;
-        let lp = polar(c, r_dial + 26.0, mid);
+        let lp = polar(c, r_dial + 25.0, mid);
         let align = if mid.cos() > 0.3 {
             Align2::LEFT_CENTER
         } else if mid.cos() < -0.3 {
@@ -596,12 +605,12 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
         } else {
             Align2::CENTER_CENTER
         };
-        p.text(lp, align, name, FontId::proportional(9.0), if on { TEXT } else { DIM });
+        p.text(lp, align, name, FontId::proportional(10.0), if on { TEXT } else { DIM });
     }
     for i in 0..21 {
         let a = dial_angle(i);
         let pos = polar(c, r_dial, a);
-        let hit = Rect::from_center_size(pos, Vec2::splat(18.0));
+        let hit = Rect::from_center_size(pos, Vec2::splat(20.0));
         let resp = ui.interact(hit, egui::Id::new(("prog", i)), Sense::click());
         if resp.clicked() {
             set_enum(st, P::Program, i);
@@ -616,23 +625,23 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
             FAINT
         };
         if i < 12 {
-            p.circle_filled(pos, [2.8, 4.2, 5.8][i % 3], col);
+            p.circle_filled(pos, [3.2, 4.8, 6.6][i % 3], col);
         } else {
             // Pulsars: small four-pointed stars.
-            let s = 4.5;
-            p.line_segment([pos - vec2(s, 0.0), pos + vec2(s, 0.0)], stroke(1.4, col));
-            p.line_segment([pos - vec2(0.0, s), pos + vec2(0.0, s)], stroke(1.4, col));
-            p.circle_filled(pos, 1.8, col);
+            let s = 5.2;
+            p.line_segment([pos - vec2(s, 0.0), pos + vec2(s, 0.0)], stroke(1.5, col));
+            p.line_segment([pos - vec2(0.0, s), pos + vec2(0.0, s)], stroke(1.5, col));
+            p.circle_filled(pos, 2.0, col);
         }
         if i == selected && switching {
-            p.add(egui::Shape::line(arc(pos, 9.0, -PI / 2.0, TAU * settle, 24), stroke(1.5, AMBER)));
+            p.add(egui::Shape::line(arc(pos, 10.5, -PI / 2.0, TAU * settle, 24), stroke(1.5, AMBER)));
         }
         if resp.hovered() {
-            p.text(polar(c, r_dial - 18.0, a), Align2::CENTER_CENTER, NAMES[i], FontId::proportional(9.5), TEXT);
+            p.text(polar(c, r_dial - 20.0, a), Align2::CENTER_CENTER, NAMES[i], FontId::proportional(10.5), TEXT);
         }
     }
     let a = dial_angle(selected);
-    p.line_segment([polar(c, r_dial - 13.0, a), polar(c, r_dial - 6.0, a)], stroke(2.0, AMBER));
+    p.line_segment([polar(c, r_dial - 15.0, a), polar(c, r_dial - 7.0, a)], stroke(2.0, AMBER));
 
     // Drag on the outer sky to sweep through the programs.
     let ring = Rect::from_center_size(c, Vec2::splat(r_dial * 2.0 + 30.0));
@@ -641,7 +650,7 @@ fn orrery(ui: &mut egui::Ui, st: &Ctx, c: Pos2, t: f32) {
         && let Some(pp) = resp.interact_pointer_pos()
     {
         let d = pp - c;
-        if d.length() > r_dial - 26.0 {
+        if d.length() > r_dial - 28.0 {
             let mut a = d.y.atan2(d.x);
             if a < PI * 0.5 {
                 a += TAU;
@@ -666,7 +675,7 @@ fn pulsar_orbits(
     let sc = &st.params().scope;
     let state = sc.read(Slot::LoopState) as u8;
     let len = sc.read(Slot::LoopLen) as usize;
-    let (rl, rr) = (112.0, 82.0);
+    let (rl, rr) = (112.0 * K, 82.0 * K);
     let (cl, cr) = (shade(ORBIT[0]), shade(ORBIT[1]));
     let level = sc.read(Slot::MemoryPeak).min(1.0);
     match state {
@@ -678,7 +687,7 @@ fn pulsar_orbits(
                     p.add(egui::Shape::line(arc(c, r, a, 0.06, 3), stroke(1.0, alpha(col, 0.35))));
                 }
             }
-            p.text(c + vec2(0.0, 46.0), Align2::CENTER_CENTER, "awaiting matter · ACCRETE", FontId::proportional(10.0), DIM);
+            p.text(c + vec2(0.0, 50.0 * K), Align2::CENTER_CENTER, "awaiting matter · press REC", FontId::proportional(11.0), DIM);
             return;
         }
         1 => {
@@ -687,7 +696,7 @@ fn pulsar_orbits(
                 p.circle_stroke(c, r, stroke(1.0, alpha(col, 0.15)));
                 p.add(egui::Shape::line(arc(c, r, -PI / 2.0, TAU * f, 96), stroke(2.4, col)));
             }
-            p.text(c + vec2(0.0, 46.0), Align2::CENTER_CENTER, "accreting · press ACCRETE again to close the orbit", FontId::proportional(10.0), AMBER);
+            p.text(c + vec2(0.0, 50.0 * K), Align2::CENTER_CENTER, "accreting · press REC again to close the orbit", FontId::proportional(11.0), AMBER);
             return;
         }
         _ => {}
@@ -706,12 +715,12 @@ fn pulsar_orbits(
         ] {
             for s in 0..slices {
                 let a = -PI / 2.0 + step * s as f32;
-                p.line_segment([polar(c, r - 6.0, a), polar(c, r + 6.0, a)], stroke(1.0, alpha(col, 0.5)));
+                p.line_segment([polar(c, r - 7.0, a), polar(c, r + 7.0, a)], stroke(1.0, alpha(col, 0.5)));
             }
             // The torn-off slice the head is actually playing from.
             let q = sc.read(Slot::SliceQ);
             let a_src = -PI / 2.0 + step * (src as f32 + q);
-            p.add(egui::Shape::line(arc(c, r, -PI / 2.0 + step * src as f32, step, 24), stroke(3.0, alpha(col, 0.55))));
+            p.add(egui::Shape::line(arc(c, r, -PI / 2.0 + step * src as f32, step, 24), stroke(3.4, alpha(col, 0.55))));
             // A tidal thread from where we are to where the sound comes from.
             let n = 24;
             let pts: Vec<Pos2> = (0..=n)
@@ -722,11 +731,11 @@ fn pulsar_orbits(
                 })
                 .collect();
             p.add(egui::Shape::line(pts, stroke(1.0, alpha(col, 0.45))));
-            p.circle_filled(polar(c, r, a_src), 3.0, col);
+            p.circle_filled(polar(c, r, a_src), 3.4, col);
         }
         let flash = sc.read(Slot::Flash);
         if (18..=19).contains(&alg) && flash > 0.02 {
-            p.circle_stroke(c, 128.0 + (1.0 - flash) * 30.0, stroke(2.0, alpha(ROSE, flash * 0.8)));
+            p.circle_stroke(c, (128.0 + (1.0 - flash) * 30.0) * K, stroke(2.0, alpha(ROSE, flash * 0.8)));
         }
     }
     if alg == 20 {
@@ -742,12 +751,12 @@ fn pulsar_orbits(
         if let Some(m) = ghost {
             let ph = sc.get(Slot::Head0 as usize);
             let a = -PI / 2.0 + TAU * (ph * m).fract();
-            p.circle_filled(polar(c, rl - 16.0, a), 3.0, alpha(VIOLET, 0.9));
-            p.text(c + vec2(0.0, 46.0), Align2::CENTER_CENTER, if m > 1.0 { "octave up, compounding" } else { "octave down, compounding" }, FontId::proportional(9.5), VIOLET);
+            p.circle_filled(polar(c, rl - 18.0, a), 3.4, alpha(VIOLET, 0.9));
+            p.text(c + vec2(0.0, 50.0 * K), Align2::CENTER_CENTER, if m > 1.0 { "octave up, compounding" } else { "octave down, compounding" }, FontId::proportional(10.5), VIOLET);
         }
     }
     if (13..=14).contains(&alg) {
-        p.text(c + vec2(0.0, 46.0), Align2::CENTER_CENTER, if alg == 13 { "8 : 7" } else { "4 : 3" }, FontId::proportional(12.0), DIM);
+        p.text(c + vec2(0.0, 50.0 * K), Align2::CENTER_CENTER, if alg == 13 { "8 : 7" } else { "4 : 3" }, FontId::proportional(13.0), DIM);
     }
     planet(rl, a_l, cl, 3.8 + level * 3.0);
     planet(rr, a_r, cr, 3.8 + level * 3.0);
@@ -795,8 +804,8 @@ fn status_line(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
     } else {
         format!("{}{}", NAMES[active], if quad && active < 12 { "   ·   primes II" } else { "" })
     };
-    p.text(pos2(r.center().x, r.top() + 4.0), Align2::CENTER_TOP, title, FontId::proportional(14.0), TEXT);
-    p.text(pos2(r.center().x, r.top() + 23.0), Align2::CENTER_TOP, lines, FontId::monospace(9.5), DIM);
+    p.text(pos2(r.center().x, r.top() + 1.0), Align2::CENTER_TOP, title, FontId::proportional(14.0), TEXT);
+    p.text(pos2(r.center().x, r.top() + 20.0), Align2::CENTER_TOP, lines, FontId::monospace(9.5), DIM);
 
     let m = sc.read(Slot::MemoryPeak);
     for (k, &tv) in [0.07, 0.155, 0.31, 0.56, 0.9].iter().enumerate() {
@@ -815,7 +824,6 @@ fn status_line(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
 
 #[derive(Clone, Copy)]
 enum Icon {
-    Accrete,
     Erode,
     Retrograde,
     Eclipse,
@@ -827,18 +835,6 @@ enum Icon {
 fn icon(p: &egui::Painter, c: Pos2, kind: Icon, col: Color32, t: f32, on: bool) {
     let s = stroke(1.6, col);
     match kind {
-        Icon::Accrete => {
-            // An accretion disc spiralling into a core.
-            let pts: Vec<Pos2> = (0..=60)
-                .map(|i| {
-                    let u = i as f32 / 60.0;
-                    let a = u * TAU * 2.2 + if on { t * 2.0 } else { 0.0 };
-                    c + vec2(a.cos() * (14.0 - 11.0 * u), a.sin() * (14.0 - 11.0 * u) * 0.55)
-                })
-                .collect();
-            p.add(egui::Shape::line(pts, s));
-            p.circle_filled(c, 3.0, col);
-        }
         Icon::Erode => {
             for k in 0..10 {
                 let a = k as f32 / 10.0 * TAU;
@@ -891,101 +887,147 @@ fn pad(ui: &mut egui::Ui, key: &str, r: Rect, on: f32, col: Color32, title: &str
     let on = on.clamp(0.0, 1.0);
     let col = if enabled { col } else { FAINT };
     if on > 0.01 {
-        p.rect_filled(r.expand(4.0), CornerRadius::same(14), alpha(col, 0.07 * on));
+        p.rect_filled(r.expand(4.0), CornerRadius::same(13), alpha(col, 0.07 * on));
     }
-    p.rect_filled(r, CornerRadius::same(12), lerp_color(PAD, lerp_color(PAD, col, 0.22), on));
+    p.rect_filled(r, CornerRadius::same(11), lerp_color(PAD, lerp_color(PAD, col, 0.22), on));
     let border = if resp.hovered() { alpha(col, 0.8) } else { alpha(col, 0.2 + 0.6 * on) };
-    p.rect_stroke(r, CornerRadius::same(12), stroke(1.0, border), StrokeKind::Inside);
+    p.rect_stroke(r, CornerRadius::same(11), stroke(1.0, border), StrokeKind::Inside);
     if resp.is_pointer_button_down_on() {
-        p.rect_filled(r, CornerRadius::same(12), alpha(Color32::WHITE, 0.05));
+        p.rect_filled(r, CornerRadius::same(11), alpha(Color32::WHITE, 0.05));
     }
-    let ic = pos2(r.center().x, r.top() + 30.0);
-    icon(p, ic, kind, if on > 0.5 { col } else { lerp_color(DIM, col, 0.35) }, t, on > 0.5);
-    p.text(pos2(r.center().x, r.top() + 60.0), Align2::CENTER_CENTER, title, FontId::proportional(12.5), if on > 0.5 { TEXT } else { lerp_color(DIM, TEXT, 0.5) });
+    icon(p, pad_icon(r), kind, if on > 0.5 { col } else { lerp_color(DIM, col, 0.35) }, t, on > 0.5);
+    p.text(pos2(r.center().x, r.top() + 50.0), Align2::CENTER_CENTER, title, FontId::proportional(11.5), if on > 0.5 { TEXT } else { lerp_color(DIM, TEXT, 0.5) });
     if !sub.is_empty() {
-        p.text(pos2(r.center().x, r.top() + 79.0), Align2::CENTER_CENTER, sub, FontId::proportional(8.5), if enabled { DIM } else { FAINT });
+        p.text(pos2(r.center().x, r.top() + 64.0), Align2::CENTER_CENTER, sub, FontId::proportional(8.0), if enabled { DIM } else { FAINT });
     }
     resp
 }
 
-fn pads(ui: &mut egui::Ui, st: &Ctx, s: &mut SideralUi, r: Rect, t: f32) {
-    let n = 7.0;
-    let gap = 10.0;
-    let w = (r.width() - gap * (n - 1.0)) / n;
-    let cell = |i: usize| Rect::from_min_size(pos2(r.left() + i as f32 * (w + gap), r.top()), vec2(w, r.height()));
-    let (lay, _, _) = current(st);
-    let sc = &st.params().scope;
+fn pad_icon(r: Rect) -> Pos2 {
+    pos2(r.center().x, r.top() + 24.0)
+}
 
-    // ACCRETE: record, with its two groups.
+/// Width of the cell that holds the round REC button and its L / R moons.
+const REC_CELL: f32 = 156.0;
+
+/// REC: the round button in the middle of the row. Its two moons choose
+/// which side of the sky receives new matter; both lit is L+R.
+fn rec_button(ui: &mut egui::Ui, st: &Ctx, s: &mut SideralUi, cell: Rect, t: f32) {
     let rec = enum_index(st, P::Record);
     if rec != 0 {
         s.last_rec = rec;
     }
-    let rc = cell(0);
-    let chips_r = Rect::from_min_size(pos2(rc.left() + 14.0, rc.bottom() - 24.0), vec2(rc.width() - 28.0, 16.0));
-    let chip_hit = ui.rect_contains_pointer(chips_r);
-    let resp = pad(ui, "accrete", rc, if rec != 0 { 1.0 } else { 0.0 }, AMBER, "ACCRETE", "", Icon::Accrete, t, true);
-    if resp.clicked() && !chip_hit {
-        set_enum(st, P::Record, if rec == 0 { s.last_rec } else { 0 });
+    let on = rec != 0;
+    let c = cell.center();
+    let r = 41.0;
+    let hit = Rect::from_center_size(c, Vec2::splat(r * 2.0));
+    let resp = ui.interact(hit, egui::Id::new("rec"), Sense::click());
+    let inside = resp.hover_pos().is_some_and(|q| (q - c).length() <= r + 2.0);
+    if resp.clicked() && inside {
+        set_enum(st, P::Record, if on { 0 } else { s.last_rec });
     }
-    for (i, l) in ["L", "R", "L+R"].iter().enumerate() {
-        let cw = chips_r.width() / 3.0;
-        let cr = Rect::from_min_size(pos2(chips_r.left() + i as f32 * cw, chips_r.top()), vec2(cw, chips_r.height())).shrink(1.0);
-        let cresp = ui.interact(cr, egui::Id::new(("recchip", i)), Sense::click());
-        if cresp.clicked() {
-            s.last_rec = i + 1;
-            set_enum(st, P::Record, i + 1);
+    let p = ui.painter();
+    let breath = 0.5 + 0.5 * (t * 3.2).sin();
+    if on {
+        p.circle_filled(c, r + 7.0 + breath * 2.0, alpha(RED, 0.08));
+        p.circle_filled(c, r + 3.0, alpha(RED, 0.12));
+    }
+    p.circle_filled(c, r, if on { lerp_color(PAD, RED, 0.24) } else { PAD });
+    let border = if inside { alpha(RED, 0.9) } else { alpha(RED, if on { 0.85 } else { 0.35 }) };
+    p.circle_stroke(c, r, stroke(if on { 1.6 } else { 1.0 }, border));
+    // An orbit of matter falling in while recording.
+    let ring = r - 7.0;
+    for k in 0..24 {
+        let a = k as f32 / 24.0 * TAU + if on { t * 0.9 } else { 0.0 };
+        let lit = if on { 0.25 + 0.6 * ((k as f32 / 24.0 + t * 0.4).fract()) } else { 0.18 };
+        p.add(egui::Shape::line(arc(c, ring, a, 0.12, 2), stroke(1.2, alpha(if on { AMBER } else { DIM }, lit))));
+    }
+    if resp.is_pointer_button_down_on() && inside {
+        p.circle_filled(c, r, alpha(Color32::WHITE, 0.05));
+    }
+    let core = c + vec2(0.0, -8.0);
+    p.circle_filled(core, 9.0 + if on { breath * 1.5 } else { 0.0 }, if on { RED } else { lerp_color(PAD, RED, 0.45) });
+    p.text(c + vec2(0.0, 14.0), Align2::CENTER_CENTER, "REC", FontId::proportional(13.0), if on { TEXT } else { lerp_color(DIM, TEXT, 0.5) });
+
+    // The two moons: L and R. Each toggles its side; one must stay lit.
+    for (bit, label, dx) in [(1usize, "L", -1.0f32), (2, "R", 1.0)] {
+        let mc = c + vec2(dx * (r + 22.0), 0.0);
+        let mr = 12.0;
+        let mresp = ui.interact(Rect::from_center_size(mc, Vec2::splat(mr * 2.0 + 4.0)), egui::Id::new(("recmoon", bit)), Sense::click());
+        if mresp.clicked() {
+            let mask = s.last_rec ^ bit;
+            if mask != 0 {
+                s.last_rec = mask;
+                if on {
+                    set_enum(st, P::Record, mask);
+                }
+            }
         }
-        let sel = s.last_rec == i + 1;
+        let sel = s.last_rec & bit != 0;
         let p = ui.painter();
-        let fill = if sel && rec != 0 {
-            alpha(AMBER, 0.85)
-        } else if sel {
-            alpha(AMBER, 0.25)
-        } else {
-            Color32::from_rgb(26, 29, 42)
+        let fill = match (sel, on) {
+            (true, true) => alpha(AMBER, 0.9),
+            (true, false) => alpha(AMBER, 0.28),
+            _ => Color32::from_rgb(26, 29, 42),
         };
-        p.rect_filled(cr, CornerRadius::same(4), fill);
-        p.text(cr.center(), Align2::CENTER_CENTER, *l, FontId::proportional(8.5), if sel && rec != 0 { BG } else { DIM });
+        p.circle_filled(mc, mr, fill);
+        if mresp.hovered() {
+            p.circle_stroke(mc, mr, stroke(1.0, alpha(AMBER, 0.8)));
+        }
+        p.text(mc, Align2::CENTER_CENTER, label, FontId::proportional(10.0), if sel && on { BG } else { DIM });
+    }
+}
+
+fn pads(ui: &mut egui::Ui, st: &Ctx, s: &mut SideralUi, r: Rect, t: f32) {
+    let gap = 10.0;
+    let w = (r.width() - REC_CELL - gap * 6.0) / 6.0;
+    let mid = Rect::from_center_size(r.center(), vec2(REC_CELL, r.height()));
+    let cell = |i: usize| {
+        let x = if i < 3 { r.left() + i as f32 * (w + gap) } else { mid.right() + gap + (i - 3) as f32 * (w + gap) };
+        Rect::from_min_size(pos2(x, r.top()), vec2(w, r.height()))
+    };
+    let (lay, _, _) = current(st);
+    let sc = &st.params().scope;
+
+    let retro = is_on(st, P::Reverse);
+    if pad(ui, "retro", cell(0), if retro { 1.0 } else { 0.0 }, CYAN, "RETROGRADE", "the tape turns back", Icon::Retrograde, t, true).clicked() {
+        set(st, P::Reverse, if retro { 0.0 } else { 1.0 });
+    }
+
+    let ecl = is_on(st, P::Eclipse);
+    if pad(ui, "eclipse", cell(1), if ecl { 1.0 } else { 0.0 }, Color32::from_rgb(230, 230, 240), "ECLIPSE", "memory held, untouched", Icon::Eclipse, t, true).clicked() {
+        set(st, P::Eclipse, if ecl { 0.0 } else { 1.0 });
     }
 
     // ERODE: hold to wear away what is playing.
     let erode = is_on(st, P::Erase);
-    let resp = pad(ui, "erode", cell(1), if erode { 1.0 } else { 0.0 }, ROSE, "ERODE", "hold to wear away", Icon::Erode, t, true);
+    let resp = pad(ui, "erode", cell(2), if erode { 1.0 } else { 0.0 }, ROSE, "ERODE", "hold to wear away", Icon::Erode, t, true);
     let held = resp.is_pointer_button_down_on();
     if held != erode {
         set(st, P::Erase, if held { 1.0 } else { 0.0 });
     }
 
-    let retro = is_on(st, P::Reverse);
-    if pad(ui, "retro", cell(2), if retro { 1.0 } else { 0.0 }, CYAN, "RETROGRADE", "the tape turns back", Icon::Retrograde, t, true).clicked() {
-        set(st, P::Reverse, if retro { 0.0 } else { 1.0 });
-    }
-
-    let ecl = is_on(st, P::Eclipse);
-    if pad(ui, "eclipse", cell(3), if ecl { 1.0 } else { 0.0 }, Color32::from_rgb(230, 230, 240), "ECLIPSE", "memory held, untouched", Icon::Eclipse, t, true).clicked() {
-        set(st, P::Eclipse, if ecl { 0.0 } else { 1.0 });
-    }
+    rec_button(ui, st, s, mid, t);
 
     let rs = is_on(st, P::HalfSpeed);
     let rs_ok = matches!(lay.family, Family::TwoDelays | Family::FourDelays | Family::Pulsar);
     let rs_sub = if rs_ok { "half speed, an octave down" } else { "binaries, trapezia, pulsars" };
-    if pad(ui, "redshift", cell(4), if rs { 1.0 } else { 0.0 }, RED, "REDSHIFT", rs_sub, Icon::Redshift, t, rs_ok).clicked() {
+    if pad(ui, "redshift", cell(3), if rs { 1.0 } else { 0.0 }, RED, "REDSHIFT", rs_sub, Icon::Redshift, t, rs_ok).clicked() {
         set(st, P::HalfSpeed, if rs { 0.0 } else { 1.0 });
     }
 
     let dust = is_on(st, P::Grit);
-    if pad(ui, "dust", cell(5), if dust { 1.0 } else { 0.0 }, SAND, "DUST", "sample & hold grain", Icon::Dust, t, true).clicked() {
+    if pad(ui, "dust", cell(4), if dust { 1.0 } else { 0.0 }, SAND, "DUST", "sample & hold grain", Icon::Dust, t, true).clicked() {
         set(st, P::Grit, if dust { 0.0 } else { 1.0 });
     }
 
     // BIG CRUNCH: hold for 0.8 s to collapse the whole memory.
     let now = ui.input(|i| i.time);
-    let cr = cell(6);
+    let cr = cell(5);
     let clearing = sc.read(Slot::Clearing) > 0.5;
     let progress = s.crunch_start.map_or(0.0, |t0| ((now - t0) / 0.8) as f32);
     let glow = if clearing { 1.0 } else if progress.is_finite() { progress * 0.8 } else { 0.0 };
-    let resp = pad(ui, "crunch", cr, glow, RED, "BIG CRUNCH", "hold to collapse it all", Icon::Crunch, t, true);
+    let resp = pad(ui, "crunch", cr, glow, VIOLET, "BIG CRUNCH", "hold to collapse it all", Icon::Crunch, t, true);
     if resp.is_pointer_button_down_on() {
         let t0 = *s.crunch_start.get_or_insert(now);
         if now - t0 >= 0.8 {
@@ -996,7 +1038,7 @@ fn pads(ui: &mut egui::Ui, st: &Ctx, s: &mut SideralUi, r: Rect, t: f32) {
         s.crunch_start = None;
     }
     if progress > 0.0 && progress.is_finite() {
-        ui.painter().add(egui::Shape::line(arc(pos2(cr.center().x, cr.top() + 30.0), 19.0, -PI / 2.0, TAU * progress.min(1.0), 40), stroke(2.0, RED)));
+        ui.painter().add(egui::Shape::line(arc(pad_icon(cr), 18.0, -PI / 2.0, TAU * progress.min(1.0), 40), stroke(2.0, VIOLET)));
     }
 }
 
@@ -1007,27 +1049,27 @@ fn pads(ui: &mut egui::Ui, st: &Ctx, s: &mut SideralUi, r: Rect, t: f32) {
 fn strip(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
     section(ui.painter(), r, "");
     let (lay, _, _) = current(st);
-    let y = r.top() + 34.0;
-    let h = 26.0;
+    let y = r.top() + 22.0;
+    let h = 21.0;
     let caption = |ui: &mut egui::Ui, x: f32, text: &str, sub: &str| {
         let p = ui.painter();
-        p.text(pos2(x + 2.0, r.top() + 18.0), Align2::LEFT_CENTER, text, FontId::proportional(10.0), TEXT);
-        p.text(pos2(x + 2.0, r.top() + 76.0), Align2::LEFT_CENTER, sub, FontId::proportional(8.5), FAINT);
+        p.text(pos2(x + 2.0, r.top() + 12.0), Align2::LEFT_CENTER, text, FontId::proportional(9.0), TEXT);
+        p.text(pos2(x + 2.0, r.top() + 51.0), Align2::LEFT_CENTER, sub, FontId::proportional(8.0), FAINT);
     };
     let mut x = r.left() + 16.0;
     caption(ui, x, "LOW CUT", "Hz · inside the orbit");
-    segmented(ui, st, P::Hpf, &["OFF", "266", "462", "786"], Rect::from_min_size(pos2(x, y), vec2(220.0, h)), GREEN, true);
-    x += 240.0;
+    segmented(ui, st, P::Hpf, &["OFF", "266", "462", "786"], Rect::from_min_size(pos2(x, y), vec2(200.0, h)), GREEN, true);
+    x += 224.0;
     caption(ui, x, "HIGH CUT", "Hz · a tape-like bend");
-    segmented(ui, st, P::Lpf, &["OFF", "622", "1.2k", "5.2k"], Rect::from_min_size(pos2(x, y), vec2(220.0, h)), GREEN, true);
-    x += 240.0;
+    segmented(ui, st, P::Lpf, &["OFF", "622", "1.2k", "5.2k"], Rect::from_min_size(pos2(x, y), vec2(200.0, h)), GREEN, true);
+    x += 224.0;
     let pulsar = lay.family == Family::Pulsar;
     caption(ui, x, "PERIOD", if pulsar { "pulsar orbit, locked to the host bars" } else { "pulsars only" });
-    segmented(ui, st, P::Period, &["FREE", "1", "2", "4", "8"], Rect::from_min_size(pos2(x, y), vec2(250.0, h)), AMBER, pulsar);
-    x += 270.0;
+    segmented(ui, st, P::Period, &["FREE", "1", "2", "4", "8"], Rect::from_min_size(pos2(x, y), vec2(230.0, h)), AMBER, pulsar);
+    x += 254.0;
     caption(ui, x, "HORIZON", "below it, nothing enters");
-    segmented(ui, st, P::Gate, &["OPEN", "−48", "−68"], Rect::from_min_size(pos2(x, y), vec2(190.0, h)), VIOLET, true);
-    x += 210.0;
+    segmented(ui, st, P::Gate, &["OPEN", "−48", "−68"], Rect::from_min_size(pos2(x, y), vec2(180.0, h)), VIOLET, true);
+    x += 204.0;
     caption(ui, x, "INPUT", "two sources, one sky");
     let tr = Rect::from_min_size(pos2(x, y), vec2(r.right() - x - 16.0, h));
     let resp = ui.interact(tr, egui::Id::new("mono"), Sense::click());
@@ -1037,5 +1079,5 @@ fn strip(ui: &mut egui::Ui, st: &Ctx, r: Rect) {
     }
     let p = ui.painter();
     p.rect_filled(tr.shrink(1.5), CornerRadius::same(5), if on { alpha(CYAN, 0.85) } else { Color32::from_rgb(22, 25, 37) });
-    p.text(tr.center(), Align2::CENTER_CENTER, if on { "SUMMED" } else { "STEREO" }, FontId::proportional(9.5), if on { BG } else { DIM });
+    p.text(tr.center(), Align2::CENTER_CENTER, if on { "SUMMED" } else { "STEREO" }, FontId::proportional(9.0), if on { BG } else { DIM });
 }

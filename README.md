@@ -10,7 +10,8 @@ AU · VST3 · CLAP · standalone — macOS (Apple Silicon), Windows, Linux.
 
 ## What is it, exactly?
 
-Sideral is 44.7 seconds of sound memory with ideas above its station.
+Sideral is a sound memory of no fixed opinion about its own length, with ideas above its
+station.
 
 Whatever you feed it is written into a ring of delay lines whose lengths are all different
 prime numbers of samples. Primes, being famously antisocial, refuse to line up. So the
@@ -76,7 +77,7 @@ Congratulations. You have observed your first sidereal event. Make a note in you
 
 The large circle in the middle is not decoration, or not only.
 
-- The **outer ring** is the entire memory, all 44.7 seconds of it, coloured by how the current
+- The **outer ring** is the entire memory, however long it is today, coloured by how the current
   program has carved it up. Grey regions are memory the program isn't using but hasn't
   forgotten either.
 - Each **orbit** inside is a delay line. Its **planet** is the write head. The longer the
@@ -107,7 +108,7 @@ becomes a loop, without your consent and quite beautifully.
 
 The Pulsar constellation is for when you want the sky to keep a beat.
 
-- **Pulsar** — a straightforward loop. Press **ACCRETE** to start recording and press it
+- **Pulsar** — a straightforward loop. Press **REC** to start recording and press it
   again to close the orbit. The loop is exactly as long as you let it run.
 - **Resonance 8:7** and **4:3** — the right channel loops a little sooner than the left.
   The bar stays put while the two halves slide gently out of phase, like moons in an
@@ -153,9 +154,13 @@ by hand.
 
 ### The pads
 
+In the middle of the row sits **REC**, the large round button, glowing red while it listens.
+Its two small moons, **L** and **R**, choose which side of the sky receives new matter: light
+one for a single side, both for the whole sky. Turn REC off to play freely over what is
+already there. On either side of it are six pads:
+
 | Pad | What it does |
 |---|---|
-| **ACCRETE** | Record. Choose **L**, **R** or **L+R**: which side of the sky receives new matter. Turn it off to play freely over what is already there. |
 | **ERODE** | Hold to wear away what is currently playing. Release to stop eroding. Geology, in your hands. |
 | **RETROGRADE** | The tape turns around. Everything plays backwards, including whatever you play next. |
 | **ECLIPSE** | Freezes the memory, bit for bit. Nothing is written while it is on; play over it freely. |

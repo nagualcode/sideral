@@ -169,7 +169,7 @@ pub struct SideralParams {
     pub hpf: EnumParam<Hpf>,
     #[param(name = "High Cut", default = 0)]
     pub lpf: EnumParam<Lpf>,
-    #[param(name = "Accrete", default = 3)]
+    #[param(name = "Rec", default = 3)]
     pub record: EnumParam<Record>,
     #[param(name = "Retrograde", short_name = "Retro", default = false)]
     pub reverse: BoolParam,
