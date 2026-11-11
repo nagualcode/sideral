@@ -1,0 +1,32 @@
+uuid = "ac09569e-19df-5750-a1eb-8dcc8593cace"
+name = "Sidereal Day"
+category = "Binary"
+author = "Jardim Sonoro"
+comment = "The 21 and 23 second lines: a phrase returns long after it was forgotten."
+default = false
+
+[params]
+program = 2
+constellation = 0
+blur = 0.35
+drift = 0.55
+drive = 0.0
+supcom = 0.5
+feedback = 0.95
+mix = 0.55
+hpf = 1
+lpf = 3
+record = 3
+half_speed = 0
+clock = 1.0
+gate = 2
+input = 0.0
+output = 0.0
+reverse = 0
+erase = 0
+erase_all = 0
+grit = 0
+mono = 0
+eclipse = 0
+width = 1.0
+period = 0

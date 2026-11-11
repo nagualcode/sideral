@@ -1,0 +1,32 @@
+uuid = "e14a91c4-0f5b-506a-9d53-c5e1f5b1127d"
+name = "Pulsar in Two Bars"
+category = "Pulsar"
+author = "Jardim Sonoro"
+comment = "A loop locked to two bars of the host; the Halo glows around it."
+default = false
+
+[params]
+program = 12
+blur = 0.35
+drift = 0.3
+drive = 0.0
+supcom = 0.5
+feedback = 0.95
+mix = 0.6
+record = 3
+period = 2
+input = 0.0
+output = 0.0
+reverse = 0
+erase = 0
+erase_all = 0
+grit = 0
+mono = 0
+eclipse = 0
+width = 1.0
+hpf = 0
+lpf = 0
+half_speed = 0
+clock = 1.0
+gate = 2
+constellation = 0

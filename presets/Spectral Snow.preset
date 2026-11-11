@@ -1,0 +1,32 @@
+uuid = "55253d71-b841-5599-96de-5ae821c51193"
+name = "Spectral Snow"
+category = "Stardust"
+author = "Jardim Sonoro"
+comment = "Large grains scattered by noise and chaotic drift, with the central granular delay."
+default = false
+
+[params]
+program = 11
+constellation = 0
+blur = 0.65
+drift = 0.8
+drive = 0.0
+supcom = 0.6
+feedback = 0.92
+mix = 0.6
+hpf = 0
+lpf = 3
+record = 3
+half_speed = 0
+clock = 1.0
+gate = 2
+input = 0.0
+output = 0.0
+reverse = 0
+erase = 0
+erase_all = 0
+grit = 0
+mono = 0
+eclipse = 0
+width = 1.0
+period = 0

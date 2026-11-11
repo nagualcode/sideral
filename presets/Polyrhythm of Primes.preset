@@ -1,0 +1,32 @@
+uuid = "2ea13b69-ceed-5bf1-95d1-69b5dd89250d"
+name = "Polyrhythm of Primes"
+category = "Trapezium"
+author = "Jardim Sonoro"
+comment = "Four short lines for percussion: 2.8, 3.2, 1.9 and 2.4 seconds that never meet."
+default = false
+
+[params]
+program = 3
+constellation = 0
+blur = 0.3
+drift = 0.7
+drive = 0.1
+supcom = 0.5
+feedback = 0.9
+mix = 0.5
+hpf = 1
+lpf = 0
+record = 3
+half_speed = 0
+clock = 1.0
+gate = 2
+input = 0.0
+output = 0.0
+reverse = 0
+erase = 0
+erase_all = 0
+grit = 0
+mono = 0
+eclipse = 0
+width = 1.0
+period = 0

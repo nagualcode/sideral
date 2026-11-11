@@ -1,0 +1,32 @@
+uuid = "f97ee530-3925-518c-8c8b-25eca688104b"
+name = "Objet Sonore"
+category = "Trapezium"
+author = "Jardim Sonoro"
+comment = "Suppressor on: each new sound replaces the memory, Schaeffer's sound object held in isolation."
+default = false
+
+[params]
+program = 4
+constellation = 0
+blur = 0.2
+drift = 0.4
+drive = 0.0
+supcom = 0.08
+feedback = 0.97
+mix = 0.6
+hpf = 0
+lpf = 0
+record = 3
+half_speed = 0
+clock = 1.0
+gate = 2
+input = 0.0
+output = 0.0
+reverse = 0
+erase = 0
+erase_all = 0
+grit = 0
+mono = 0
+eclipse = 0
+width = 1.0
+period = 0

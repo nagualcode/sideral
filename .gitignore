@@ -1,0 +1,4 @@
+/target
+.DS_Store
+# SOMA Laboratory's firmware images and manuals: kept locally for study, not redistributed.
+/reference/

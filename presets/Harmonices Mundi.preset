@@ -1,0 +1,32 @@
+uuid = "5bd43c32-327c-522c-902b-e4fb7b3de275"
+name = "Harmonices Mundi"
+category = "Pulsar"
+author = "Jardim Sonoro"
+comment = "Kepler's octaves, recursive: each pass an octave higher than the last, a fractal accelerando."
+default = false
+
+[params]
+program = 20
+blur = 0.5
+drift = 1.0
+drive = 0.0
+supcom = 0.5
+feedback = 0.952
+mix = 0.6
+record = 3
+period = 0
+input = 0.0
+output = 0.0
+reverse = 0
+erase = 0
+erase_all = 0
+grit = 0
+mono = 0
+eclipse = 0
+width = 1.0
+hpf = 0
+lpf = 0
+half_speed = 0
+clock = 1.0
+gate = 2
+constellation = 0

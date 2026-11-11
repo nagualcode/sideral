@@ -1,0 +1,210 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Create/update a GitHub release with the built artifacts"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  TRUCE_VERSION: "6.3.0"
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            version="${GITHUB_REF#refs/tags/v}"
+          else
+            version="$(sed -n 's/^version *= *"\(.*\)"/\1/p' Cargo.toml | head -1)"
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "Release version: ${version}"
+
+  build:
+    needs: version
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS (Apple Silicon)
+            os: macos-15
+            slug: macOS-arm64
+            formats: "--clap --vst3 --au2"
+            standalone_bin: sideral-standalone
+          - name: Windows (x86_64)
+            os: windows-2022
+            slug: Windows-x86_64
+            formats: "--clap --vst3"
+            standalone_bin: sideral-standalone.exe
+          - name: Linux (x86_64)
+            os: ubuntu-22.04
+            slug: Linux-x86_64
+            formats: "--clap --vst3"
+            standalone_bin: sideral-standalone
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Linux build dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            pkg-config \
+            libasound2-dev \
+            libjack-jackd2-dev \
+            libx11-dev libxcursor-dev libxrandr-dev libxi-dev \
+            libxcb1-dev libxcb-icccm4-dev libxcb-dri2-0-dev libxcb-xfixes0-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libfontconfig1-dev libfreetype6-dev \
+            libwayland-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.slug }}
+
+      - name: Install cargo-truce
+        shell: bash
+        run: cargo install cargo-truce --version "${TRUCE_VERSION}"
+
+      - name: Run tests
+        shell: bash
+        run: cargo test --release --lib --no-default-features
+
+      - name: Build plugin bundles
+        shell: bash
+        run: cargo truce build ${{ matrix.formats }} --verbose
+
+      - name: Build standalone application
+        shell: bash
+        run: cargo build --release --no-default-features --features standalone --bin sideral-standalone
+
+      - name: Stage release payload
+        shell: bash
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          SLUG: ${{ matrix.slug }}
+          STANDALONE_BIN: ${{ matrix.standalone_bin }}
+        run: |
+          set -euo pipefail
+          stage="dist/Sideral-${SLUG}-v${VERSION}"
+          rm -rf dist
+          mkdir -p "$stage"
+
+          shopt -s nullglob
+          found=0
+          for bundle in target/bundles/Sideral.vst3 target/bundles/Sideral.clap target/bundles/Sideral.component; do
+            if [ -e "$bundle" ]; then
+              cp -R "$bundle" "$stage/"
+              found=1
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No plugin bundles found in target/bundles:" >&2
+            ls -la target/bundles >&2 || true
+            exit 1
+          fi
+
+          cp "target/release/${STANDALONE_BIN}" "$stage/${STANDALONE_BIN}"
+
+          mkdir -p "$stage/Presets"
+          cp presets/*.preset "$stage/Presets/"
+
+          cp README.md LICENSE "$stage/"
+          if [ "${RUNNER_OS}" = "macOS" ]; then
+            cp install.sh uninstall.sh "$stage/"
+            chmod +x "$stage/install.sh" "$stage/uninstall.sh"
+          fi
+
+          echo "stage=$stage" >> "$GITHUB_ENV"
+          echo "--- staged contents ---"
+          find "$stage" -maxdepth 1
+
+      - name: Archive (macOS)
+        if: runner.os == 'macOS'
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          SLUG: ${{ matrix.slug }}
+        run: |
+          set -euo pipefail
+          # ditto preserves bundle structure, symlinks and extended attributes
+          ditto -c -k --sequesterRsrc --keepParent \
+            "dist/Sideral-${SLUG}-v${VERSION}" \
+            "dist/Sideral-${SLUG}-v${VERSION}.zip"
+
+      - name: Archive (Linux)
+        if: runner.os == 'Linux'
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          SLUG: ${{ matrix.slug }}
+        run: |
+          set -euo pipefail
+          tar -czf "dist/Sideral-${SLUG}-v${VERSION}.tar.gz" \
+            -C dist "Sideral-${SLUG}-v${VERSION}"
+
+      - name: Archive (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          SLUG: ${{ matrix.slug }}
+        run: |
+          $name = "Sideral-$env:SLUG-v$env:VERSION"
+          Compress-Archive -Path "dist/$name" -DestinationPath "dist/$name.zip" -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sideral-${{ matrix.slug }}
+          path: |
+            dist/*.zip
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  release:
+    needs: [version, build]
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -la artifacts
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.version.outputs.version }}
+          name: Sideral v${{ needs.version.outputs.version }}
+          draft: false
+          generate_release_notes: true
+          files: |
+            artifacts/*.zip
+            artifacts/*.tar.gz
