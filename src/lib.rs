@@ -13,6 +13,7 @@
 //! clock coupled to the host through band-limited resampling.
 
 pub mod clock;
+pub mod denormals;
 pub mod engine;
 pub mod scope;
 mod ui;
@@ -326,6 +327,7 @@ impl PluginLogic for Sideral {
         _events: &EventList,
         context: &mut ProcessContext,
     ) -> ProcessStatus {
+        let _ftz = denormals::NoDenormals::new();
         let mut c = controls(params);
         let scope = &params.scope;
         let speed = f64::from(params.clock.value());
@@ -355,9 +357,20 @@ impl PluginLogic for Sideral {
 
         let SideralDsp { engine, clock, out_peak, .. } = state;
         let mut peak = 0.0f32;
+        // Gains in dB: the power function only runs while a knob is moving.
+        let (mut gi_db, mut gi) = (f32::NAN, 1.0);
+        let (mut go_db, mut go) = (f32::NAN, 1.0);
         buffer.for_each_frame_io::<2, 2, _>(|fin, fout| {
-            let gi = db(params.input.read());
-            let go = db(params.output.read());
+            let v = params.input.read();
+            if v != gi_db {
+                gi_db = v;
+                gi = db(v);
+            }
+            let v = params.output.read();
+            if v != go_db {
+                go_db = v;
+                go = db(v);
+            }
             let y = clock.process([fin[0] * gi, fin[1] * gi], speed, grit, |x| {
                 let (l, r) = engine.tick(&c, x[0], x[1]);
                 [l, r]

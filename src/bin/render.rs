@@ -146,6 +146,7 @@ fn main() {
     let mut clock = Clock::new();
     clock.set_rate(f64::from(rate));
     let t0 = std::time::Instant::now();
+    let _ftz = sideral::denormals::NoDenormals::new();
     let mut y = Vec::with_capacity(n);
     for i in 0..n {
         let x = src.get(i).copied().unwrap_or([0.0; 2]);

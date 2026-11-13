@@ -1,6 +1,6 @@
 [package]
 name = "sideral"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2024"
 description = "Sideral: a drifting memory station after the SOMA COSMOS, rebuilt from its firmware"
 authors = ["Jardim Sonoro", "nagualcode"]
