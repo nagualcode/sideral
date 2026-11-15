@@ -58,14 +58,15 @@ astronomy without a host.
 ## First light (in five minutes)
 
 1. Put Sideral on a track with a sound source: a guitar, a voice, a synth, a kettle.
-2. Leave it on **Binary · I**, the program at the bottom left of the dial. Set **MIX** to
-   about half and **ORBIT** to about three-quarters.
+2. Leave it on **Binary · I**, the first star at the bottom left of the dial. In the right
+   sky, drag the **MIX** moon until it is half full and the **ORBIT** planet about
+   three-quarters of the way up its orbit.
 3. Play a short phrase and stop. Wait. It returns about two seconds later, from the left, and
    again slightly later from the right.
 4. Play another phrase over the first. Notice that the two never quite meet the same way
    twice. This is the whole point, and also the whole plot.
-5. Now press **ECLIPSE**. The memory freezes, exactly as it is, and you can play over it for
-   as long as you like. Press it again and the sky resumes turning.
+5. Now tap **ECLIPSE**. The memory freezes, exactly as it is, and you can play over it for
+   as long as you like. Tap it again and the sky resumes turning.
 
 Congratulations. You have observed your first sidereal event. Make a note in your logbook.
 
@@ -88,7 +89,8 @@ Watch the planets for long enough and you will see that they never line up again
 
 ### The twenty-one programs, in five constellations
 
-Click a point on the dial, or drag around the outer sky to sweep. A newly chosen program
+Tap a star on the dial, or drag along it to sweep. The names are written along the curve;
+rest a pointer exactly on a star and it will introduce itself. A newly chosen program
 takes about a second to arrive: Sideral fades out, re-slices the memory, and fades back in.
 Celestial bodies do not hurry, and nor should you.
 
@@ -124,7 +126,7 @@ The Pulsar constellation is for when you want the sky to keep a beat.
   an accelerating cascade of echoes, an octave higher each time. Kepler would have been
   delighted. His landlady less so.
 
-**PERIOD** (in the strip at the bottom) locks the Pulsar loop to 1, 2, 4 or 8 bars of your
+**PERIOD** (a constellation on the horizon, at the bottom) locks the Pulsar loop to 1, 2, 4 or 8 bars of your
 DAW's tempo. Press play and the loop snaps to the bar. Leave it on **FREE** to set the length
 by hand.
 
@@ -132,57 +134,71 @@ by hand.
 
 ## The controls
 
-### MATTER (left)
+There are no knobs. There are no buttons either, in any sense a hardware shop would
+recognise. Everything you can change is a body in the sky, and every body is large enough
+for a finger, for those whose screens permit that sort of thing. Nothing hides behind a
+hover, a wheel or a modifier key.
 
-| Control | What it does |
+### The ten bodies
+
+Ten bodies orbit the sun: five in the left sky (**MATTER**) and five in the right
+(**GRAVITY**). Drag one along its orbit; up is more. Double-tap to send it home, to the
+small tick on its orbit. While you hold one, a line under the title says what it is doing
+in the current program. Each looks like what it does, which saves reading.
+
+#### MATTER (left sky)
+
+| Body | Looks like | What it does |
+|---|---|---|
+| **SCATTER** | A nebula that spreads | Lets the lines bleed into one another. In Stardust it scatters the grains; in the Pulsars it adds the *Halo*, a small, shimmering plate reverb. In the Nebula it has nothing to do and enjoys the rest. |
+| **DRIFT** | A comet; the tail grows | Moves the lines across the stereo field on slow, chaotic tides. In Stardust it moves the grains. In Kepler it chooses the octave (low = down, middle = still, high = up). In Supernova, past noon, it permits random octave falls. |
+| **FLARE** | A star throwing spikes | Odd harmonics, burning inside the loop. A little warms things; a lot sets them alight. |
+| **DILATION** | A planet whose moon turns at the speed of time | The speed of time itself, from ×½ to ×2. Everything slows down or speeds up together: echoes, pitch, grains. Relativity, but with a moon. |
+| **IN** | A green planet | Input level. Its atmosphere glows green when there is enough, red when there is too much. |
+
+#### GRAVITY (right sky)
+
+| Body | Looks like | What it does |
+|---|---|---|
+| **ORBIT** | A ringed planet | How much of the memory survives each pass. The reading shows the loop gain: below ×1.000 the orbit decays (amber), at ×1.000 it holds forever (white), above it things begin to grow (red). A soft limiter catches them before the neighbours complain, and the planet blushes when it does. |
+| **TIDE** | A moon lit from one side | Below the middle (*ebb*): each new sound washes the old away, then lets it return. Above it (*flow*): a compressor that lifts the quiet and settles the loud. In the middle the moon is dark and nothing happens, which is also nice. |
+| **MIX** | A moon that fills | Memory against the present moment. Full moon, all memory. |
+| **PARALLAX** | A double star drawing apart | Stereo width, from a single point to wider than your speakers. |
+| **OUT** | A green planet | Output level. |
+
+### REC and the phenomena
+
+Under the dial, in a row. In the middle sits **REC**, a red giant, glowing while it listens.
+Its two moons, **L** and **R**, choose which side of the sky receives new matter: light one
+for a single side, both for the whole sky. Turn REC off to play freely over what is already
+there. Three phenomena wait on either side of it:
+
+| Phenomenon | What it does |
 |---|---|
-| **SCATTER** | Lets the lines bleed into one another. In Stardust it scatters the grains; in the Pulsars it adds the *Halo*, a small, shimmering plate reverb. In the Nebula it has nothing to do and enjoys the rest. |
-| **DRIFT** | Moves the lines across the stereo field on slow, chaotic tides. In Stardust it moves the grains. In Kepler it chooses the octave (low = down, middle = still, high = up). In Supernova, past noon, it permits random octave falls. |
-| **FLARE** | Odd harmonics, burning inside the loop. A little warms things; a lot sets them alight. |
-| **IN** | Input level. The little light goes green when there is enough, red when there is too much. |
-| **DILATION** | The speed of time itself, from ×½ to ×2. Everything slows down or speeds up together: echoes, pitch, grains. Relativity, but with a knob. |
-
-### GRAVITY (right)
-
-| Control | What it does |
-|---|---|
-| **TIDE** | Left of centre (*ebb*): each new sound washes the old away, then lets it return. Right of centre (*flow*): a compressor that lifts the quiet and settles the loud. Centre: nothing, which is also nice. |
-| **ORBIT** | How much of the memory survives each pass. The readout shows the loop gain: below ×1.000 the orbit decays, at ×1.000 it holds forever, above it things begin to grow. A soft limiter catches them before the neighbours complain. |
-| **MIX** | Memory against the present moment. |
-| **OUT** | Output level. |
-| **PARALLAX** | Stereo width, from a single point to wider than your speakers. |
-
-### The pads
-
-In the middle of the row sits **REC**, the large round button, glowing red while it listens.
-Its two small moons, **L** and **R**, choose which side of the sky receives new matter: light
-one for a single side, both for the whole sky. Turn REC off to play freely over what is
-already there. On either side of it are six pads:
-
-| Pad | What it does |
-|---|---|
+| **RETROGRADE** | Tap. The tape turns around, and so does the little moon. Everything plays backwards, including whatever you play next. |
+| **ECLIPSE** | Tap. Freezes the memory, bit for bit. Nothing is written while it is on; play over it freely. |
 | **ERODE** | Hold to wear away what is currently playing. Release to stop eroding. Geology, in your hands. |
-| **RETROGRADE** | The tape turns around. Everything plays backwards, including whatever you play next. |
-| **ECLIPSE** | Freezes the memory, bit for bit. Nothing is written while it is on; play over it freely. |
-| **REDSHIFT** | Half speed, an octave down, with a lovely rough edge. Binary, Trapezium and Pulsar only. |
-| **DUST** | Switches the conversion to sample-and-hold. Grainy, aliased, slightly radioactive. Pairs well with DILATION below ×1. |
+| **REDSHIFT** | Tap. Half speed, an octave down, with a lovely rough edge. Binary, Trapezium and Pulsar only. |
+| **DUST** | Tap. Switches the conversion to sample-and-hold. Grainy, aliased, slightly radioactive. Pairs well with DILATION below ×1. |
 | **BIG CRUNCH** | Hold for just under a second to collapse the entire memory into silence. There is no undo. There never is, with a Big Crunch. |
 
-### The strip
+### The horizon
 
-| Control | What it does |
+Along the bottom lie six small constellations, one star lit in each. Tap the star you want.
+
+| Constellation | What it does |
 |---|---|
+| **PRIMES** | Chooses between two sets of prime numbers, **I** and **II**. Put one instance on **I** feeding your front speakers and another on **II** feeding the rear, give them the same input, and you have quadraphony that never repeats itself. |
 | **LOW CUT** / **HIGH CUT** | Filters *inside* the loop, so each pass gets thinner or darker. The high cut bends like old tape. |
 | **PERIOD** | Locks Pulsar loops to the host's bars. |
 | **HORIZON** | A noise gate. Below it, nothing enters the memory. *Open* lets everything in; −68 dB is polite; −48 dB is strict. |
 | **INPUT** | *Stereo*, or *Summed* to feed two different mono sources into the same sky. |
 
-At the top right, **PRIMES I / II** chooses between two sets of prime numbers. Put one
-instance on **I** feeding your front speakers and another on **II** feeding the rear, give
-them the same input, and you have quadraphony that never repeats itself.
+Every body, phenomenon and star can be automated from your DAW. This is how you perform an
+eclipse at precisely 3:42.
 
-Every pad and knob can be automated from your DAW. This is how you perform an eclipse at
-precisely 3:42.
+The stars in the background are dealt afresh each time Sideral is loaded. No two skies are
+alike. Do not attempt to navigate by them.
 
 ---
 
